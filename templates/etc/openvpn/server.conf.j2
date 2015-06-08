@@ -1,0 +1,35 @@
+{% if two_fa is defined %}
+plugin /usr/lib64/openvpn/plugin/lib/openvpn-auth-pam.so openvpn
+{% endif %}
+local {{ public_ip }}
+port 1194
+proto udp
+dev tun
+ca /etc/openvpn/easyrsa/pki/ca.crt
+cert /etc/openvpn/easyrsa/pki/issued/main.crt
+key /etc/openvpn/easyrsa/pki/private/main.key
+dh /etc/openvpn/easyrsa/pki/dh.pem
+server 192.168.0.0 255.255.255.0
+ifconfig-pool-persist ipp.txt
+client-config-dir ccd
+push "redirect-gateway def1 bypass-dhcp"
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+push "dhcp-option DNS 208.67.222.222"
+push "dhcp-option DNS 208.67.220.220"
+client-to-client
+keepalive 10 900
+tls-auth /etc/openvpn/easyrsa/pki/private/ta.key 0
+tls-cipher TLS-DHE-RSA-WITH-AES-256-CBC-SHA
+cipher AES-256-CFB8
+auth SHA512
+comp-lzo
+max-clients 100
+user vpndata
+group vpndata
+persist-key
+persist-tun
+status /var/log/openvpn/openvpn-status.log
+log /var/log/openvpn/openvpn.log
+verb 1
+reneg-sec 10800

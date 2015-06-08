@@ -1,0 +1,14 @@
+---
+# tasks file for openvpn
+
+- name: Check if openvpn has already run
+  stat: path=/root/.portaltech.setup.a.openvpn
+  register: openvpn_setup
+
+- name: Run the openvpn tasks
+  include: main_sub.yml
+#  when: openvpn_setup.stat.exists == False
+
+- name: Mark openvpn as completed for this host
+  file: path=/root/.portaltech.setup.a.openvpn state=touch
+  when: openvpn_setup.stat.exists == False

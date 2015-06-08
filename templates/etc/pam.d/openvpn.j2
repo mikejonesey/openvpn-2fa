@@ -1,0 +1,7 @@
+# google auth
+auth        required    /usr/local/lib/security/pam_google_authenticator.so
+
+account        required    pam_nologin.so
+account        include        system-auth
+password       include        system-auth
+session        include        system-auth

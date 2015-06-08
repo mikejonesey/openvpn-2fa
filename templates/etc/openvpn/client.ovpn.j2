@@ -1,0 +1,22 @@
+client
+dev tun
+proto udp
+remote {{ public_ip }}
+persist-key
+persist-tun
+ca ca.crt
+cert easyrsa/pki/issued/client.crt
+key easyrsa/pki/private/client.key
+{% if two_fa is defined %}
+auth-user-pass
+{% endif %}
+comp-lzo yes
+nobind
+auth-nocache
+script-security 2
+reneg-sec 10800
+tls-auth easyrsa/pki/private/ta.key 1
+cipher AES-256-CFB8
+tls-cipher TLS-DHE-RSA-WITH-AES-256-CBC-SHA
+remote-cert-tls server
+auth SHA512
