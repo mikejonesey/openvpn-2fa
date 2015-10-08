@@ -9,7 +9,7 @@ ca /etc/openvpn/easyrsa/pki/ca.crt
 cert /etc/openvpn/easyrsa/pki/issued/main.crt
 key /etc/openvpn/easyrsa/pki/private/main.key
 dh /etc/openvpn/easyrsa/pki/dh.pem
-server 192.168.0.0 255.255.255.0
+server {{ vpn_subnet }} 255.255.255.0
 ifconfig-pool-persist ipp.txt
 client-config-dir ccd
 push "redirect-gateway def1 bypass-dhcp"

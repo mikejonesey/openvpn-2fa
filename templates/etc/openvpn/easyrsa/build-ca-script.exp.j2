@@ -45,5 +45,5 @@ set timeout -1
 spawn ./easyrsa build-ca nopass
 match_max 100000
 expect -exact "Common Name (eg: your user, host, or server name) \[Easy-RSA CA\]:"
-send -- "test1004\r"
+send -- "{{ ansible_hostname }}\r"
 expect eof

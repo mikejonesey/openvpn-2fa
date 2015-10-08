@@ -13,6 +13,18 @@
   - pam-devel
   when: ansible_distribution == 'CentOS'
 
+- name: "Openvpn: Install dependencies."
+  apt: pkg={{ item }} state=present
+  with_items:
+  - openvpn
+  - git
+  - expect
+  - openssl
+  - automake
+  - libtool
+  - libpam-dev
+  when: ansible_distribution == 'Debian'
+
 - name: "Create User"
   user:
     name="{{ item.name }}"
@@ -26,7 +38,7 @@
     - { name: 'vpndata', comment: 'Vpndata', shell: '/bin/sh', createhome: 'yes', uid: '451' }
 
 - name: "Checkout easyrsa"
-  git: clone="yes" repo="https://github.com/OpenVPN/easy-rsa" dest="/usr/local/src/easyrsa"
+  git: update="yes" repo="https://github.com/OpenVPN/easy-rsa" dest="/usr/local/src/easyrsa"
 
 - name: "Copy easyrsa3 to openvpn"
   shell: >
@@ -38,7 +50,7 @@
   template: src="etc/openvpn/easyrsa/vars.j2" dest="/etc/openvpn/easyrsa/vars"
   
 - name: "Upload build-ca script"
-  template: src="etc/openvpn/easyrsa/build-ca-script.exp.j2" dest="/etc/openvpn/easyrsa/build-ca-script.exp" mode="0750"
+  template: src="etc/openvpn/easyrsa/build-ca-script.exp.j2" dest="/etc/openvpn/easyrsa/build-ca-script.exp" mode="0755"
 
 - name: "Init PKI"
   shell: >
@@ -60,7 +72,7 @@
 
 - name: "Build Diffie Hellman"
   shell: chdir=/etc/openvpn/easyrsa nohup ./easyrsa gen-dh
-  async: 45
+  async: 20000
   poll: 0
   when: dh_stat.stat.exists == False
     
@@ -95,7 +107,7 @@
   file: path="/etc/openvpn/ccd" state="directory" mode="0750" owner="vpndata" group="vpndata"
 
 - name: "Checkout Google Authenticator"
-  git: clone="yes" repo="https://github.com/google/google-authenticator/" dest="/usr/local/src/google-authenticator"
+  git: update="yes" repo="https://github.com/google/google-authenticator/" dest="/usr/local/src/google-authenticator"
   when: two_fa is defined
 
 - name: "Auto-reconf Google Auth"
@@ -144,6 +156,9 @@
   
 - name: "Check networing var"
   lineinfile: dest="/etc/sysconfig/network" regexp="^NETWORKING" line="NETWORKING=YES"
+  when: ansible_distribution == 'CentOS'
+
+# todo... systemd stuff... (service name openvpn@server.service)
 
 - name: "Start OpenVPN"
   service: name=openvpn state=restarted
