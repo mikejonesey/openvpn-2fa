@@ -1,6 +1,12 @@
 ---
 # tasks file for openvpn
 
+# Use an IP other than that used to connect to administer the box if defined...
+- name: "Set VPN IP Address"
+  set_fact:
+    public_ip: "{{ ansible_ssh_host }}"
+  when: "public_ip is not defined"
+
 - name: "Openvpn: Install dependencies."
   yum: pkg={{ item }} state=present
   with_items:
@@ -106,36 +112,43 @@
 - name: "Create CCD"
   file: path="/etc/openvpn/ccd" state="directory" mode="0750" owner="vpndata" group="vpndata"
 
+#- name: "Checkout Google Authenticator"
+#  git: update="yes" repo="https://github.com/google/google-authenticator/" dest="/usr/local/src/google-authenticator"
+#  when: two_fa is defined
+
 - name: "Checkout Google Authenticator"
-  git: update="yes" repo="https://github.com/google/google-authenticator/" dest="/usr/local/src/google-authenticator"
+  git:
+    update: "yes"
+    repo: "https://github.com/google/google-authenticator-libpam.git"
+    dest: "/usr/local/src/google-authenticator"
   when: two_fa is defined
 
 - name: "Auto-reconf Google Auth"
   shell: >
     autoreconf --install
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
+    chdir: /usr/local/src/google-authenticator/
   when: two_fa is defined
 
 - name: "Configure Google Auth"
   shell: >
     ./configure
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
+    chdir: /usr/local/src/google-authenticator/
   when: two_fa is defined
 
 - name: "Make Google Auth"
   shell: >
     make
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
+    chdir: /usr/local/src/google-authenticator/
   when: two_fa is defined
 
 - name: "Install Google Auth"
   shell: >
     make install
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
+    chdir: /usr/local/src/google-authenticator/
   when: two_fa is defined
 
 - name: "Upload OpenVPN Server Config"
@@ -161,4 +174,6 @@
 # todo... systemd stuff... (service name openvpn@server.service)
 
 - name: "Start OpenVPN"
-  service: name=openvpn state=restarted
+  service:
+    name: openvpn@server
+    state: restarted
