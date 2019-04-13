@@ -2,3 +2,5 @@ EASYRSA_REQ_ORG: ACME
 EASYRSA_REQ_EMAIL: example@example.com
 EASYRSA_REQ_OU: ACME
 
+vpn_subnet: 192.168.1.0/24
+
