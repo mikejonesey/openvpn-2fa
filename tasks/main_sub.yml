@@ -1,6 +1,12 @@
 ---
 # tasks file for openvpn
 
+# Use an IP other than that used to connect to administer the box if defined...
+- name: "Set VPN IP Address"
+  set_fact:
+    public_ip: "{{ ansible_ssh_host }}"
+  when: "public_ip is not defined"
+
 - name: "Openvpn: Install dependencies."
   yum: pkg={{ item }} state=present
   with_items:
@@ -107,36 +113,39 @@
   file: path="/etc/openvpn/ccd" state="directory" mode="0750" owner="vpndata" group="vpndata"
 
 - name: "Checkout Google Authenticator"
-  git: update="yes" repo="https://github.com/google/google-authenticator/" dest="/usr/local/src/google-authenticator"
-  when: two_fa is defined
+  git:
+    update: "yes"
+    repo: "https://github.com/google/google-authenticator-libpam.git"
+    dest: "/usr/local/src/google-authenticator"
+  when: "two_fa is not defined or two_fa|bool != False"
 
 - name: "Auto-reconf Google Auth"
   shell: >
     autoreconf --install
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
-  when: two_fa is defined
+    chdir: /usr/local/src/google-authenticator/
+  when: "two_fa is not defined or two_fa|bool != False"
 
 - name: "Configure Google Auth"
   shell: >
     ./configure
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
-  when: two_fa is defined
+    chdir: /usr/local/src/google-authenticator/
+  when: "two_fa is not defined or two_fa|bool != False"
 
 - name: "Make Google Auth"
   shell: >
     make
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
-  when: two_fa is defined
+    chdir: /usr/local/src/google-authenticator/
+  when: "two_fa is not defined or two_fa|bool != False"
 
 - name: "Install Google Auth"
   shell: >
     make install
   args:
-    chdir: /usr/local/src/google-authenticator/libpam/
-  when: two_fa is defined
+    chdir: /usr/local/src/google-authenticator/
+  when: "two_fa is not defined or two_fa|bool != False"
 
 - name: "Upload OpenVPN Server Config"
   template: src="etc/pam.d/openvpn.j2" dest="/etc/pam.d/openvpn" mode="0644" owner="root" group="root"
@@ -161,4 +170,6 @@
 # todo... systemd stuff... (service name openvpn@server.service)
 
 - name: "Start OpenVPN"
-  service: name=openvpn state=restarted
+  service:
+    name: openvpn@server
+    state: restarted
