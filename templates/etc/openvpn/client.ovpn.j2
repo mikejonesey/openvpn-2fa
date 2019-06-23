@@ -14,9 +14,9 @@ comp-lzo yes
 nobind
 auth-nocache
 script-security 2
-reneg-sec 10800
+reneg-sec {{ openvpn_reneg_sec }}
 tls-auth easyrsa/pki/private/ta.key 1
-cipher AES-256-CFB8
-tls-cipher TLS-DHE-RSA-WITH-AES-256-CBC-SHA
+cipher {{ openvpn_cipher }}
+tls-cipher {{ openvpn_tlscipher }}
 remote-cert-tls server
-auth SHA512
+auth {{ openvpn_auth }}
