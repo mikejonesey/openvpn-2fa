@@ -2,5 +2,33 @@ EASYRSA_REQ_ORG: ACME
 EASYRSA_REQ_EMAIL: example@example.com
 EASYRSA_REQ_OU: ACME
 
-vpn_subnet: 192.168.1.0/24
+openvpn_subnet: 192.168.1.0/24
 
+openvpn_port: 1194
+openvpn_proto: udp
+openvpn_dev: tun
+openvpn_ccd: ccd
+
+openvpn_dns:
+  - name: Google 1
+    ip: 8.8.8.8
+  - name: Google 2
+    ip: 8.8.4.4
+  - name: a1
+    ip: 208.67.222.222
+  - name: a2
+    ip: 208.67.220.220
+    
+openvpn_enable_client_to_client: yes
+openvpn_keepalive: "10 900"
+openvpn_tlscipher: TLS-DHE-RSA-WITH-AES-256-CBC-SHA
+openvpn_cipher: AES-256-CFB8
+openvpn_auth: SHA512
+openvpn_lzo: yes
+openvpn_max_clients: 100
+
+openvpn_user: vpndata
+openvpn_group: vpndata
+
+openvpn_verb: 1
+openvpn_reneg_sec: 10800

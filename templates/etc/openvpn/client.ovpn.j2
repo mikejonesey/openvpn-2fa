@@ -1,6 +1,6 @@
 client
-dev tun
-proto udp
+dev {{ openvpn_dev }}
+proto {{ openvpn_proto }}
 remote {{ public_ip }}
 persist-key
 persist-tun

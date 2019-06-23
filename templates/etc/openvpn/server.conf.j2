@@ -2,34 +2,37 @@
 plugin /usr/lib64/openvpn/plugin/lib/openvpn-auth-pam.so openvpn
 {% endif %}
 local {{ public_ip }}
-port 1194
-proto udp
-dev tun
+port {{ openvpn_port }}
+proto {{ openvpn_proto }}
+dev {{ openvpn_dev }}
 ca /etc/openvpn/easyrsa/pki/ca.crt
 cert /etc/openvpn/easyrsa/pki/issued/main.crt
 key /etc/openvpn/easyrsa/pki/private/main.key
 dh /etc/openvpn/easyrsa/pki/dh.pem
-server {{ vpn_subnet }} 255.255.255.0
+server {{ openvpn_subnet }} 255.255.255.0
 ifconfig-pool-persist ipp.txt
-client-config-dir ccd
+client-config-dir {{ openvpn_ccd }}
 push "redirect-gateway def1 bypass-dhcp"
-push "dhcp-option DNS 8.8.8.8"
-push "dhcp-option DNS 8.8.4.4"
-push "dhcp-option DNS 208.67.222.222"
-push "dhcp-option DNS 208.67.220.220"
+{% for dnsserver in openvpn_dns %}
+push "dhcp-option DNS {{ dnsserver.ip }}"
+{% endfor %}
+{% if openvpn_enable_client_to_client|bool == True %}
 client-to-client
-keepalive 10 900
+{% endif %}
+keepalive {{ openvpn_keepalive }}
 tls-auth /etc/openvpn/easyrsa/pki/private/ta.key 0
-tls-cipher TLS-DHE-RSA-WITH-AES-256-CBC-SHA
-cipher AES-256-CFB8
-auth SHA512
+tls-cipher {{ openvpn_tlscipher }}
+cipher {{ openvpn_cipher }}
+auth {{ openvpn_auth }}
+{% if openvpn_lzo|bool == True %}
 comp-lzo
-max-clients 100
-user vpndata
-group vpndata
+{% endif %}
+max-clients {{ openvpn_max_clients }}
+user {{ openvpn_user }}
+group {{ openvpn_group }}
 persist-key
 persist-tun
 status /var/log/openvpn/openvpn-status.log
 log /var/log/openvpn/openvpn.log
-verb 1
-reneg-sec 10800
+verb {{ openvpn_verb }}
+reneg-sec {{ openvpn_reneg_sec }}

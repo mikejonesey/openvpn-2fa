@@ -110,7 +110,7 @@
   file: path="/var/log/openvpn" state="directory" mode="0750" owner="vpndata" group="vpndata"
 
 - name: "Create CCD"
-  file: path="/etc/openvpn/ccd" state="directory" mode="0750" owner="vpndata" group="vpndata"
+  file: path="/etc/openvpn/{{ openvpn_ccd }}" state="directory" mode="0750" owner="vpndata" group="vpndata"
 
 - name: "Checkout Google Authenticator"
   git:
